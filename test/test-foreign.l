@@ -549,21 +549,19 @@ test-testd = 1.23456
   (assert (= (ret-eusinteger 123 645000) (+ 123 645000)))
   )
 
-#|
-;; ret-int
-;; ret-short
-;; ret-char
-
 ;; callback function
 (defun-c-callable LISP-IFUNC () :integer
   (format t "LISP-INTFUNC is called, return ~D~%" 1234)
   1234)
-;;
-(format t "~%callback function test(integer)~%")
-(format t "  callback function is set~%")
-(set-ifunc (pod-address 'LISP-IFUNC))
-(format t "  expected result: LISP-INTFUNC is called, return 1234~%")
-(format t "  call-ifunc = ~A~%" (call-ifunc))
+
+(deftest test-callback-integer ()
+  (format t "~%callback function test(integer)~%")
+  (format t "  callback function is set~%")
+  (set-ifunc (pod-address (intern "LISP-IFUNC")))
+  (format t "  expected result: LISP-INTFUNC is called, return 1234~%")
+  (let ((result (call-ifunc)))
+    (format t "  call-ifunc = ~A~%" result)
+    (assert (= result 1234))))
 
 (defun-c-callable LISP-FFUNC ((i0 :integer) (i1 :integer) (i2 :integer)
                               (i3 :integer) (i4 :integer) (i5 :integer)
@@ -580,10 +578,12 @@ test-testd = 1.23456
   (format t "~A ~A~%" i6 i7)
   (format t "return ~A~%" 0.12345)
   0.12345)
-(format t "~%callback function test(float)~%")
-(format t "  callback function is set~%")
-(set-ffunc (pod-address 'LISP-FFUNC))
-(format t "  expected result: LISP-FFUNC is called
+
+(deftest test-callback-float ()
+  (format t "~%callback function test(float)~%")
+  (format t "  callback function is set~%")
+  (set-ffunc (pod-address (intern "LISP-FFUNC")))
+  (format t "  expected result: LISP-FFUNC is called
   100 101 102
   103 104 105
   1000.0 1010.0 1020.0 1030.0
@@ -591,8 +591,9 @@ test-testd = 1.23456
   2080.0 2090.0
   206 207
   return 0.12345~%")
-(format t "call-ffunc = ~A~%" (call-ffunc))
-|#
+  (let ((result (call-ffunc)))
+    (format t "call-ffunc = ~A~%" result)
+    (assert (< (abs (- result 0.12345)) 1e-4))))
 
 (eval-when (load eval)
   (run-all-tests)
