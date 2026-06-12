@@ -549,13 +549,15 @@ test-testd = 1.23456
   (assert (= (ret-eusinteger 123 645000) (+ 123 645000)))
   )
 
-;; callback function -- x86_64 only (trampoline machine code is architecture-specific)
-#+:x86_64
+;; callback function -- Linux x86_64 only
+;; trampoline machine code is x86_64-specific, and mprotect is needed to make
+;; the GC heap executable (not available in sysmod on macOS)
+#+(and :x86_64 :linux)
 (defun-c-callable LISP-IFUNC () :integer
   (format t "LISP-INTFUNC is called, return ~D~%" 1234)
   1234)
 
-#+:x86_64
+#+(and :x86_64 :linux)
 (deftest test-callback-integer ()
   (format t "~%callback function test(integer)~%")
   (format t "  callback function is set~%")
@@ -565,7 +567,7 @@ test-testd = 1.23456
     (format t "  call-ifunc = ~A~%" result)
     (assert (= result 1234))))
 
-#+:x86_64
+#+(and :x86_64 :linux)
 (defun-c-callable LISP-FFUNC ((i0 :integer) (i1 :integer) (i2 :integer)
                               (i3 :integer) (i4 :integer) (i5 :integer)
                               (f0 :float) (f1 :float) (f2 :float) (f3 :float)
@@ -582,7 +584,7 @@ test-testd = 1.23456
   (format t "return ~A~%" 0.12345)
   0.12345)
 
-#+:x86_64
+#+(and :x86_64 :linux)
 (deftest test-callback-float ()
   (format t "~%callback function test(float)~%")
   (format t "  callback function is set~%")
